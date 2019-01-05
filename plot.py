@@ -12,7 +12,6 @@ arr = [fitness([y]) for y in range(-10, 30)]
 
 for i in range(10):
     for i in range(-10, 30):
-        plt.clf()
         plt.plot(list(range(-10, 30)), arr)
         plt.scatter(i, fitness([i]))
         plt.pause(0.05)
