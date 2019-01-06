@@ -5,8 +5,11 @@ import matplotlib.pyplot as plt
 
 pop_size = 24
 enzo = .99
+mutation_rate = 1e-2
+epsilon = 1e-8
 
 def fitness(x):
+    # Linear fitness
     x = x[0]
     pos1 = x if x < 5 else 0
     pos2 = x - 7.5 if 10 <= x < 20 else 0
@@ -14,23 +17,26 @@ def fitness(x):
     neg2 = -x/2 + 22.5 if x >= 20 else 0
     return pos1 + pos2 + neg1 + neg2
 
+    # "The sine one"
+    '''
+    x[0] = 0 if x[0] < 0 else x[0]
+    return math.pow(x[0], math.sin(math.pow(x[0], 0.6)))
+    '''
+
 def get_random_agent():
-    return [random.gauss(-10, .01), []]
+    return [random.gauss(-10, mutation_rate), 0, []]
 
 def mutate(agent):
-    mutation_rate = 0
+    var, momentum, parent = agent
 
-    if len(agent[1]):
-        ancestors = [[np.sign(a[0] - agent[0]), a[1] - fitness(agent)] for a in agent[1]]
-        mutation_rate = np.mean([a[0] * a[1] * enzo ** (len(ancestors) - i) for i, a in enumerate(ancestors)])
+    if parent != []:
+        (parent_var, parent_fitness) = parent
+        slope = (fitness(agent) - parent_fitness) / ((var - parent_var) + epsilon)
+        momentum = enzo * momentum + (1 - enzo) * slope
 
-    mutation_rate = mutation_rate if mutation_rate > 1e-3 else np.sign(mutation_rate) * 1e-3
-    mutation = random.gauss(mutation_rate, .01)
-    print('mutation_rate:', mutation_rate)
-    print('mutation:', mutation)
+    mutation = random.gauss(momentum, mutation_rate)
 
-    new_ancestors = [*agent[1], [agent[0], fitness(agent)]]
-    new_agent = [agent[0] + mutation, new_ancestors]
+    new_agent = [agent[0] + mutation, momentum, [var, fitness(agent)]]
     return new_agent
 
 def select(agents):
@@ -39,7 +45,7 @@ def select(agents):
     survivors = []
 
     for agent in scored_agents:
-        if agent[1] > sum(scores) / len(scores):
+        if agent[1] >= sum(scores) / len(scores):
             survivors.append(agent[0])
 
     return survivors
@@ -63,8 +69,8 @@ def main():
     agents = [get_random_agent() for i in range(pop_size)]
 
     # Plotting
-    arr = [fitness([y]) for y in range(-10, 30)]
-    plt.plot(list(range(-10, 30)), arr)
+    arr = [fitness([y]) for y in np.arange(-10, 300, 0.01)]
+    plt.plot(list(np.arange(-10, 300, 0.01)), arr)
     last_point = None
 
     for i in range(512):
