@@ -26,6 +26,7 @@ def fitness(x):
 def get_random_agent():
     return [random.gauss(-10, mutation_rate), 0, []]
 
+# Fit variance. This problem won't work.
 def mutate(agent):
     var, momentum, parent = agent
 
@@ -69,8 +70,8 @@ def main():
     agents = [get_random_agent() for i in range(pop_size)]
 
     # Plotting
-    arr = [fitness([y]) for y in np.arange(-10, 300, 0.01)]
-    plt.plot(list(np.arange(-10, 300, 0.01)), arr)
+    arr = [fitness([y]) for y in np.arange(-10, 30, 0.01)]
+    plt.plot(list(np.arange(-10, 30, 0.01)), arr)
     last_point = None
 
     for i in range(512):
